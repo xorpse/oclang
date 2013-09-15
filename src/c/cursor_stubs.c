@@ -290,3 +290,18 @@ CAMLprim value ml_libclang_cxcursor_is_definition(value cursor)
 	CAMLparam1(cursor);
 	CAMLreturn(Val_bool(!!clang_isCursorDefinition(CXCursor_val(cursor))));
 }
+
+/* FIXME: > v0.6? */
+#if CINDEX_VERSION > CINDEX_VERSION_ENCODE(0, 6)
+CAMLprim value ml_libclang_cxcursor_is_bit_field(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(Val_bool(!!clang_Cursor_isBitField(CXCursor_val(cursor))));
+}
+#endif
+
+CAMLprim value ml_libclang_cxcursor_is_virtual_base(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(Val_bool(!!clang_isVirtualBase(CXCursor_val(cursor))));
+}
