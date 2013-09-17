@@ -20,6 +20,9 @@ C_OBJS = $(patsubst %.c, %.o, $(filter %.c,$(oclang_SRC)))
 ML_BYTE_OBJS = $(patsubst %.ml, %.cmo, $(filter %.ml,$(oclang_SRC)))
 ML_OPT_OBJS = $(patsubst %.ml, %.cmx, $(filter %.ml,$(oclang_SRC)))
 
+EXPORTED_OBJS = oClang
+INSTALL_OBJS = $(addsuffix .cmi, $(EXPORTED_OBJS))
+
 EXTRA_DIST = $(oclang_SRC) .depend
 
 TARGETS = @BUILDTARGETS@
@@ -27,7 +30,7 @@ TARGETS = @BUILDTARGETS@
 all: $(TARGETS)
 
 byte: oclang.cma liboclang.a
-opt: oclang.cmxa dlloclang.so
+opt: oclang.cmxa dlloclang.so oclang.cmxs
 
 oclang.cma liboclang.a : $(ML_BYTE_OBJS) $(C_OBJS)
 	$(OCAMLMKLIB) -custom -o oclang -oc oclang $^ $(LDFLAGS)
@@ -35,16 +38,19 @@ oclang.cma liboclang.a : $(ML_BYTE_OBJS) $(C_OBJS)
 oclang.cmxa dlloclang.so: $(ML_OPT_OBJS) $(C_OBJS)
 	$(OCAMLMKLIB) -o oclang -oc oclang $^ $(LDFLAGS)
 
+oclang.cmxs: oclang.cmxa
+	$(OCAMLOPT) -shared $^ -o $@ -I .
+
 install: all
 	mkdir -p $(DESTDIR)$(INSTALLDIR) $(DESTDIR)$(OCAMLLIB)/stublibs
-	install -m 644 *.mli *.ml *.cmi *.cma lib*.a $(DESTDIR)$(INSTALLDIR)
+	install -m 644 *.mli *.ml $(EXPORTED_OBJS) *.cma lib*.a $(DESTDIR)$(INSTALLDIR)
 	if test -f dlloclang.so; then \
 		install -m 644 *.cmxa *.a *.cmx $(DESTDIR)$(INSTALLDIR); \
 		install -m 755 dll*.so $(DESTDIR)$(INSTALLDIR); \
 	fi
 
 install-findlib: all
-	$(OCAMLFIND) install oclang META *.mli *.cmi *.cma *.a $(wildcard *.cmxa) $(wildcard *.so)
+	$(OCAMLFIND) install oclang META *.mli *.ml $(EXPORTED_OBJS) *.cma *.a $(wildcard *.cmxs) $(wildcard *.cmxa) $(wildcard *.so)
 
 clean:
 	-rm -f *.cm* *.o *.a *.so META

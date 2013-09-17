@@ -1,5 +1,7 @@
 version = "@PACKAGE_VERSION@"
 description = "oclang - bindings to libclang."
 archive(byte) = "oclang.cma"
+archive(byte, plugin) = "oclang.cma"
 archive(native) = "oclang.cmxa"
+archive(native, plugin) = "oclang.cmxs"
 exists_if = "oclang.cma"
