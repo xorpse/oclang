@@ -43,14 +43,14 @@ oclang.cmxs: oclang.cmxa
 
 install: all
 	mkdir -p $(DESTDIR)$(INSTALLDIR) $(DESTDIR)$(OCAMLLIB)/stublibs
-	install -m 644 *.mli *.ml $(EXPORTED_OBJS) *.cma lib*.a $(DESTDIR)$(INSTALLDIR)
+	install -m 644 *.mli *.ml $(INSTALL_OBJS) *.cma lib*.a $(DESTDIR)$(INSTALLDIR)
 	if test -f dlloclang.so; then \
 		install -m 644 *.cmxa *.a *.cmx $(DESTDIR)$(INSTALLDIR); \
 		install -m 755 dll*.so $(DESTDIR)$(INSTALLDIR); \
 	fi
 
 install-findlib: all
-	$(OCAMLFIND) install oclang META *.mli *.ml $(EXPORTED_OBJS) *.cma *.a $(wildcard *.cmxs) $(wildcard *.cmxa) $(wildcard *.so)
+	$(OCAMLFIND) install oclang META *.mli *.ml $(INSTALL_OBJS) *.cma *.a $(wildcard *.cmxs) $(wildcard *.cmxa) $(wildcard *.so)
 
 clean:
 	-rm -f *.cm* *.o *.a *.so META
