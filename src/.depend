@@ -1,0 +1,14 @@
+cursor.cmi : translationUnit.cmi
+index.cmi :
+translationUnit.cmi : index.cmi
+type.cmi :
+cursor.cmo : translationUnit.cmi cursor.cmi
+cursor.cmx : translationUnit.cmx cursor.cmi
+index.cmo : index.cmi
+index.cmx : index.cmi
+oClang.cmo : type.cmi translationUnit.cmi index.cmi cursor.cmi
+oClang.cmx : type.cmx translationUnit.cmx index.cmx cursor.cmx
+translationUnit.cmo : index.cmi translationUnit.cmi
+translationUnit.cmx : index.cmx translationUnit.cmi
+type.cmo : type.cmi
+type.cmx : type.cmi
