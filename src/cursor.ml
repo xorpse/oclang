@@ -581,8 +581,8 @@ external is_definition : t -> bool = "ml_libclang_cxcursor_is_definition"
 external is_bitfield : t -> bool = "ml_libclang_cxcursor_is_bit_field"
 external is_virtual_base : t -> bool = "ml_libclang_cxcursor_is_virtual_base"
 
-(* external cxx_method_is_pure_virtual : t -> bool = "ml_libclang_cxcursor_cxx_is_pure_virtual" *)
-external cxx_method_is_static : t -> bool = "ml_libclang_cxcursor_cxx_is_static"
-external cxx_method_is_virtual : t -> bool = "ml_libclang_cxcursor_cxx_is_virtual"
+(* external cxx_method_is_pure_virtual : t -> bool = "ml_libclang_cxcursor_cxx_meth_is_pure_virtual" *)
+external cxx_method_is_static : t -> bool = "ml_libclang_cxcursor_cxx_meth_is_static"
+external cxx_method_is_virtual : t -> bool = "ml_libclang_cxcursor_cxx_meth_is_virtual"
 external kind_of_template' : t -> int = "ml_libclang_cxcursor_cxx_kind_of_template"
 let kind_of_template t = kind_of_int (kind_of_template' t)
