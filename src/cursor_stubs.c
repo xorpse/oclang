@@ -330,7 +330,7 @@ CAMLprim value ml_libclang_cxcursor_is_virtual_base(value cursor)
 }
 
 /* CXX Specifics */
-#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 19)
+#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 20) /* Not present in clang 3.3 (0, 19) (Arch Linux) */
 CAMLprim value ml_libclang_cxcursor_cxx_meth_is_pure_virtual(value cursor)
 {
    CAMLparam1(cursor);
