@@ -52,7 +52,35 @@ type kind =
    | VariableArray
    | DependentSizedArray
 
-let rec int_of_type = function
+type calling_conv =
+   | CallingConv_Default
+   | CallingConv_C
+   | CallingConv_X86StdCall
+   | CallingConv_X86FastCall
+   | CallingConv_X86ThisCall
+   | CallingConv_X86Pascal
+   | CallingConv_AAPCS
+   | CallingConv_AAPCS_VFP
+   | CallingConv_PnaclCall
+   | CallingConv_IntelOclBicc
+   | CallingConv_X86_64Win64
+   | CallingConv_X86_64SysV
+   | CallingConv_Invalid
+   | CallingConv_Unexposed
+
+type layout_error =
+   | InvalidLayout
+   | IncompleteLayout
+   | DependentLayout
+   | NotConstantSize
+   | InvalidFieldName
+
+exception InvalidEnumDecl
+exception LayoutError of layout_error
+
+let () = Callback.register_exception "ml_libclang_exn_type_invalid_enum_decl" InvalidEnumDecl
+
+let rec int_of_kind = function
    | Invalid -> 0
    | Unexposed -> 1
    | Void -> 2
@@ -83,8 +111,8 @@ let rec int_of_type = function
    | ObjCId -> 27
    | ObjCClass -> 28
    | ObjCSel -> 29
-   | FirstBuiltin -> int_of_type Void
-   | LastBuiltin  -> int_of_type ObjCSel
+   | FirstBuiltin -> int_of_kind Void
+   | LastBuiltin  -> int_of_kind ObjCSel
    | Complex -> 100
    | Pointer -> 101
    | BlockPointer -> 102
@@ -103,7 +131,7 @@ let rec int_of_type = function
    | VariableArray -> 115
    | DependentSizedArray -> 116
 
-let type_of_int = function
+let kind_of_int = function
    | 0 -> Invalid
    | 1 -> Unexposed
    | 2 -> Void
@@ -152,3 +180,84 @@ let type_of_int = function
    | 115 -> VariableArray
    | 116 -> DependentSizedArray
    | _ -> assert false
+
+let int_of_calling_conv = function
+   | CallingConv_Default -> 0
+   | CallingConv_C -> 1
+   | CallingConv_X86StdCall -> 2
+   | CallingConv_X86FastCall -> 3
+   | CallingConv_X86ThisCall -> 4
+   | CallingConv_X86Pascal -> 5
+   | CallingConv_AAPCS -> 6
+   | CallingConv_AAPCS_VFP -> 7
+   | CallingConv_PnaclCall -> 8
+   | CallingConv_IntelOclBicc -> 9
+   | CallingConv_X86_64Win64 -> 10
+   | CallingConv_X86_64SysV -> 11
+   | CallingConv_Invalid -> 100
+   | CallingConv_Unexposed -> 200
+
+let calling_conv_of_int = function
+   | 0 -> CallingConv_Default
+   | 1 -> CallingConv_C
+   | 2 -> CallingConv_X86StdCall
+   | 3 -> CallingConv_X86FastCall
+   | 4 -> CallingConv_X86ThisCall
+   | 5 -> CallingConv_X86Pascal
+   | 6 -> CallingConv_AAPCS
+   | 7 -> CallingConv_AAPCS_VFP
+   | 8 -> CallingConv_PnaclCall
+   | 9 -> CallingConv_IntelOclBicc
+   | 10 -> CallingConv_X86_64Win64
+   | 11 -> CallingConv_X86_64SysV
+   | 100 -> CallingConv_Invalid
+   | 200 -> CallingConv_Unexposed
+   | _ -> assert false
+
+external of_cursor : Cursor.t -> t = "ml_libclang_cxtype_of_cursor"
+external name : t -> string = "ml_libclang_cxtype_name"
+
+external resolve_typedef : t -> t = "ml_libclang_cxtype_resolve_typedef"
+
+external int_type_of_enum : t -> t = "ml_libclang_cxtype_int_type_of_enum"
+external int64_of_enum_const_decl : t -> int64 = "ml_libclang_cxtype_int_type_of_const_enum"
+external uint_of_enum_const_decl' : t -> int64 = "ml_libclang_cxtype_uint_type_of_const_enum"
+let uint64_of_enum_const_decl t =
+   Uint64.of_int64 (uint_of_enum_const_decl' t)
+
+external bit_width : t -> int option = "ml_libclang_cxtype_bit_width"
+
+external canonical : t -> t = "ml_libclang_cxtype_canonical"
+
+external is_const_qualified : t -> bool = "ml_libclang_cxtype_is_const_qualified"
+external is_volatile_qualified : t -> bool = "ml_libclang_cxtype_is_volatile_qualified"
+external is_restrict_qualified : t -> bool = "ml_libclang_cxtype_is_restrict_qualified"
+
+external of_pointee : t -> t = "ml_libclang_cxtype_of_pointee"
+
+external declaration : t -> t = "ml_libclang_cxtype_declaration"
+
+external objc_type_encoding : t -> string = "ml_libclang_cxtype_objc_type_enc"
+
+external kind_to_string' : int -> string = "ml_libclang_cxtype_kind_name"
+let kind_to_string t = kind_to_string' (int_of_kind t)
+
+external calling_convention' : t -> int = "ml_libclang_cxtype_calling_convention"
+let calling_convention t = calling_conv_of_int (calling_convention' t)
+
+external result_type : t -> t = "ml_libclang_cxtype_result_type"
+
+external argument_count : t -> int option = "ml_libclang_cxtype_argument_count"
+external arguments : t -> t list = "ml_libclang_cxtype_arguments"
+
+external is_variadic : t -> bool = "ml_libclang_cxtype_is_variadic"
+external is_plain_old_data : t -> bool = "ml_libclang_cxtype_is_pod"
+
+external of_element : t -> t = "ml_libclang_cxtype_of_element"
+external element_count : t -> int option = "ml_libclang_cxtype_element_count"
+external of_array_element : t -> t = "ml_libclang_cxtype_of_array_element"
+external array_size : t -> int option = "ml_libclang_cxtype_of_array_size"
+
+external align_of : t -> int64 = "ml_libclang_cxtype_alignment_of"
+external size_of : t -> int64 = "ml_libclang_cxtype_size_of"
+external offset_of : t -> string -> int64 = "ml_libclang_cxtype_offset_of"

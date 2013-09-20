@@ -239,10 +239,15 @@ val location : t -> location
 val referenced : t -> t
 val definition : t -> t
 val is_definition : t -> bool
+val is_bitfield : t -> bool
+val is_virtual_base : t -> bool
 
+val cxx_method_is_pure_virtual : t -> bool
+val cxx_method_is_static : t -> bool
+val cxx_method_is_virtual : t -> bool
+
+val kind_of_template : t -> kind
 (* Maybe:
    * clang_findIncludesInFile
    * clang_findReferencesInFile
  *)
-
-

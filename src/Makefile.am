@@ -33,10 +33,10 @@ byte: oclang.cma liboclang.a
 opt: oclang.cmxa dlloclang.so oclang.cmxs
 
 oclang.cma liboclang.a : $(ML_BYTE_OBJS) $(C_OBJS)
-	$(OCAMLMKLIB) -custom -o oclang -oc oclang $^ $(LDFLAGS)
+	$(OCAMLFIND) ocamlmklib -custom -o oclang -oc oclang -linkpkg -package @OCAML_PKG_uint@ $^ $(LDFLAGS)
 
 oclang.cmxa dlloclang.so: $(ML_OPT_OBJS) $(C_OBJS)
-	$(OCAMLMKLIB) -o oclang -oc oclang $^ $(LDFLAGS)
+	$(OCAMLFIND) ocamlmklib -o oclang -oc oclang -linkpkg -package @OCAML_PKG_uint@ $^ $(LDFLAGS)
 
 oclang.cmxs: oclang.cmxa
 	$(OCAMLOPT) -shared $^ -o $@ -I .
@@ -56,13 +56,13 @@ clean:
 	-rm -f *.cm* *.o *.a *.so META
 
 .mli.cmi:
-	$(OCAMLC) -c $<
+	$(OCAMLFIND) ocamlc -c $< -linkpkg -package @OCAML_PKG_uint@
 
 .ml.cmo:
-	$(OCAMLC) -c $<
+	$(OCAMLFIND) ocamlc -c $< -linkpkg -package @OCAML_PKG_uint@
 
 .ml.cmx:
-	$(OCAMLOPT) -c $<
+	$(OCAMLFIND) ocamlopt -c $< -linkpkg -package @OCAML_PKG_uint@
 
 .c.o:
 	$(CC) -c $< $(CPPFLAGS) $(CFLAGS)

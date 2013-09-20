@@ -128,6 +128,30 @@ CAMLprim value ml_libclang_cxcursor_access(value cursor)
 	CAMLreturn(Val_int(clang_getCXXAccessSpecifier(CXCursor_val(cursor))));
 }
 
+CAMLprim value ml_libclang_cxcursor_overloaded_decl_count(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(Int_val(clang_getNumOverloadedDecls(CXCursor_val(cursor))));
+}
+
+CAMLprim value ml_libclang_cxcursor_overloaded_decls(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLlocal2(xs, tmp);
+
+   int count = 0;
+
+   xs = Val_emptylist;
+   
+   while (count--) {
+      tmp = caml_alloc(2, 0);
+      Store_field(tmp, 0, ml_libclang_alloc_cxcursor(clang_getOverloadedDecl(CXCursor_val(cursor), count)));
+      Store_field(tmp, 1, xs);
+      xs = tmp;
+   }
+   CAMLreturn(xs);
+}
+
 CAMLprim value ml_libclang_cxcursor_linkage(value cursor)
 {
 	CAMLparam1(cursor);
@@ -291,8 +315,7 @@ CAMLprim value ml_libclang_cxcursor_is_definition(value cursor)
 	CAMLreturn(Val_bool(!!clang_isCursorDefinition(CXCursor_val(cursor))));
 }
 
-/* FIXME: > v0.6? */
-#if CINDEX_VERSION > CINDEX_VERSION_ENCODE(0, 6)
+#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 16)
 CAMLprim value ml_libclang_cxcursor_is_bit_field(value cursor)
 {
    CAMLparam1(cursor);
@@ -304,4 +327,37 @@ CAMLprim value ml_libclang_cxcursor_is_virtual_base(value cursor)
 {
    CAMLparam1(cursor);
    CAMLreturn(Val_bool(!!clang_isVirtualBase(CXCursor_val(cursor))));
+}
+
+/* CXX Specifics */
+#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 19)
+CAMLprim value ml_libclang_cxcursor_cxx_meth_is_pure_virtual(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(Val_bool(!!clang_CXXMethod_isPureVirtual(CXCursor_val(cursor))));
+}
+#endif
+
+CAMLprim value ml_libclang_cxcursor_cxx_meth_is_static(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(Val_bool(!!clang_CXXMethod_isStatic(CXCursor_val(cursor))));
+}
+
+CAMLprim value ml_libclang_cxcursor_cxx_meth_is_virtual(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(Val_bool(!!clang_CXXMethod_isVirtual(CXCursor_val(cursor))));
+}
+
+CAMLprim value ml_libclang_cxcursor_cxx_kind_of_template(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(Int_val(clang_getTemplateCursorKind(CXCursor_val(cursor))));
+}
+
+CAMLprim value ml_libclang_cxcursor_cxx_specialized_cursor_template(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLreturn(ml_libclang_alloc_cxcursor(clang_getSpecializedCursorTemplate(CXCursor_val(cursor))));
 }

@@ -23,6 +23,11 @@ if test "$OCAMLFIND" = "no"; then
    AC_MSG_ERROR([OCaml findlib not found.])
 fi
 
+AC_CHECK_OCAML_PKG([uint])
+if test "$OCAML_PKG_uint" = "no"; then
+   AC_MSG_ERROR([uint library not found.])
+fi
+
 AC_CHECK_TOOL([LLVM_CONFIG], [llvm-config], [no]) 
 if test "$LLVM_CONFIG_FOUND" = "no"; then
    AC_MSG_ERROR([llvm-config binary not found.])

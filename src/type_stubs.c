@@ -42,8 +42,7 @@ CAMLprim value ml_libclang_cxtype_of_cursor(value cursor)
    CAMLreturn(ml_libclang_alloc_cxtype(clang_getCursorType(CXCursor_val(cursor))));
 }
 
-/* FIXME: > v0.6 */
-#if CINDEX_VERSION > CINDEX_VERSION_ENCODE(0, 6)
+#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 12)
 CAMLprim value ml_libclang_cxtype_name(value type)
 {
    CAMLparam1(type);
@@ -69,10 +68,35 @@ CAMLprim value ml_libclang_cxtype_int_type_of_enum(value cursor)
    CAMLreturn(ml_libclang_alloc_cxtype(clang_getEnumDeclIntegerType(CXCursor_val(cursor))));
 }
 
-/* TODO (will require Uint): CAMLprim value ml_libclang_cxtype_int_val_of_enum(value cursor) */
+int ml_libclang_is_valid_const_enum_decl(CXCursor cursor)
+{
+   return(clang_getEnumDeclIntegerType(cursor).kind != CXType_Invalid);
+}
 
-/* FIXME: > 0.6 */
-#if CINDEX_VERSION > CINDEX_VERSION_ENCODE(0, 6)
+CAMLprim value ml_libclang_cxtype_int_type_of_const_enum(value cursor)
+{
+   CAMLparam1(cursor);
+
+   if (ml_libclang_is_valid_const_enum_decl(CXCursor_val(cursor))) {
+      CAMLreturn(caml_copy_int64(clang_getEnumConstantDeclValue(CXCursor_val(cursor))));
+   } else {
+      caml_raise(*caml_named_value("ml_libclang_exn_type_invalid_enum_decl"));
+   }
+}
+
+CAMLprim value ml_libclang_cxtype_uint_type_of_const_enum(value cursor)
+{
+   CAMLparam1(cursor);
+
+   if (ml_libclang_is_valid_const_enum_decl(CXCursor_val(cursor))) {
+      /* Recast this back to unsigned on OCaml side using uint64 */
+      CAMLreturn(caml_copy_int64((long long)clang_getEnumConstantDeclUnsignedValue(CXCursor_val(cursor))));
+   } else {
+      caml_raise(*caml_named_value("ml_libclang_exn_type_invalid_enum_decl"));
+   }
+}
+
+#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 8)
 CAMLprim value ml_libclang_cxtype_bit_width(value cursor)
 {
    CAMLparam1(cursor);
@@ -126,6 +150,18 @@ CAMLprim value ml_libclang_cxtype_declaration(value type)
    CAMLreturn(ml_libclang_alloc_cxcursor(clang_getTypeDeclaration(CXType_val(type))));
 }
 
+CAMLprim value ml_libclang_cxtype_objc_type_enc(value cursor)
+{
+   CAMLparam1(cursor);
+   CAMLlocal1(v);
+
+   CXString str = clang_getDeclObjCTypeEncoding(CXCursor_val(cursor));
+   v = caml_copy_string(clang_getCString(str));
+   clang_disposeString(str);
+
+   CAMLreturn(v);
+}
+   
 CAMLprim value ml_libclang_cxtype_kind_name(value kind)
 {
    CAMLparam1(kind);
@@ -250,51 +286,67 @@ CAMLprim value ml_libclang_cxtype_array_size(value type)
    CAMLreturn(v);
 }
 
-/* TODO (requires int64)
-02933 enum CXTypeLayoutError {
-02935    * \brief Type is of kind CXType_Invalid.
-02937   CXTypeLayoutError_Invalid = -1,
-02939    * \brief The type is an incomplete Type.
-02941   CXTypeLayoutError_Incomplete = -2,
-02943    * \brief The type is a dependent Type.
-02945   CXTypeLayoutError_Dependent = -3,
-02947    * \brief The type is not a constant size type.
-02949   CXTypeLayoutError_NotConstantSize = -4,
-02951    * \brief The Field name is not valid for this record.
-02953   CXTypeLayoutError_InvalidFieldName = -5
-02955 
-02957  * \brief Return the alignment of a type in bytes as per C++[expr.alignof]
-02958  *   standard.
-02959  *
-02960  * If the type declaration is invalid, CXTypeLayoutError_Invalid is returned.
-02961  * If the type declaration is an incomplete type, CXTypeLayoutError_Incomplete
-02962  *   is returned.
-02963  * If the type declaration is a dependent type, CXTypeLayoutError_Dependent is
-02964  *   returned.
-02965  * If the type declaration is not a constant size type,
-02966  *   CXTypeLayoutError_NotConstantSize is returned.
-02968 CINDEX_LINKAGE long long clang_Type_getAlignOf(CXType T);
-02969 
-02971  * \brief Return the size of a type in bytes as per C++[expr.sizeof] standard.
-02972  *
-02973  * If the type declaration is invalid, CXTypeLayoutError_Invalid is returned.
-02974  * If the type declaration is an incomplete type, CXTypeLayoutError_Incomplete
-02975  *   is returned.
-02976  * If the type declaration is a dependent type, CXTypeLayoutError_Dependent is
-02977  *   returned.
-02979 CINDEX_LINKAGE long long clang_Type_getSizeOf(CXType T);
-02980 
-02982  * \brief Return the offset of a field named S in a record of type T in bits
-02983  *   as it would be returned by __offsetof__ as per C++11[18.2p4]
-02984  *
-02985  * If the cursor is not a record field declaration, CXTypeLayoutError_Invalid
-02986  *   is returned.
-02987  * If the field's type declaration is an incomplete type,
-02988  *   CXTypeLayoutError_Incomplete is returned.
-02989  * If the field's type declaration is a dependent type,
-02990  *   CXTypeLayoutError_Dependent is returned.
-02991  * If the field's name S is not found,
-02992  *   CXTypeLayoutError_InvalidFieldName is returned.
-02994 CINDEX_LINKAGE long long clang_Type_getOffsetOf(CXType T, const char *S);
-02995 
-*/
+#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 16)
+long long ml_libclang_map_type_layout_error(long long v)
+{
+   switch (v)
+   {
+      case CXTypeLayoutError_Invalid:
+         return(0);
+         break;
+      case CXTypeLayoutError_Incomplete:
+         return(1);
+         break;
+      case CXTypeLayoutError_Dependent:
+         return(2);
+         break;
+      case CXTypeLayoutError_NotConstantSize:
+         return(3);
+         break;
+      case CXTypeLayoutError_InvalidFieldName:
+         return(4);
+         break;
+      default:
+         return(v);
+   }
+}
+
+CAMLprim value ml_libclang_cxtype_alignment_of(value type)
+{
+   CAMLparam1(type);
+
+   long long v = clang_getAlignOf(CXType_val(type));
+
+   if (v < 0LL) {
+      CAMLreturn(caml_copy_int64(ml_libclang_map_type_layout_error(v)));
+   } else {
+      CAMLreturn(caml_copy_int64(v));
+   }
+}
+
+CAMLprim value ml_libclang_cxtype_size_of(value type)
+{
+   CAMLparam1(type);
+
+   long long v = clang_getSizeOf(CXType_val(type));
+
+   if (v < 0LL) {
+      CAMLreturn(caml_copy_int64(ml_libclang_map_type_layout_error(v)));
+   } else {
+      CAMLreturn(caml_copy_int64(v));
+   }
+}
+
+CAMLprim value ml_libclang_cxtype_offset_of(value type, value field)
+{
+   CAMLparam2(type, field);
+
+   long long v = clang_getOffsetOf(CXType_val(type), String_val(field));
+
+   if (v < 0LL) {
+      CAMLreturn(caml_copy_int64(ml_libclang_map_type_layout_error(v)));
+   } else {
+      CAMLreturn(caml_copy_int64(v));
+   }
+}
+#endif
