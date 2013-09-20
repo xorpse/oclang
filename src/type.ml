@@ -256,7 +256,7 @@ external is_plain_old_data : t -> bool = "ml_libclang_cxtype_is_pod"
 external of_element : t -> t = "ml_libclang_cxtype_of_element"
 external element_count : t -> int option = "ml_libclang_cxtype_element_count"
 external of_array_element : t -> t = "ml_libclang_cxtype_of_array_element"
-external array_size : t -> int option = "ml_libclang_cxtype_of_array_size"
+external array_size : t -> int option = "ml_libclang_cxtype_array_size"
 
 external align_of : t -> int64 = "ml_libclang_cxtype_alignment_of"
 external size_of : t -> int64 = "ml_libclang_cxtype_size_of"
