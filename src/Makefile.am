@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS = -I ../m4
 
 CFLAGS = `${LLVM_CONFIG} --cflags` -fPIC
 CPPFLAGS = `${LLVM_CONFIG} --cppflags` -I $(OCAMLLIB)
-LDFLAGS = `${LLVM_CONFIG} --ldflags` -lclang
+LDFLAGS = -lclang
 
 oclang_SRC = index.mli index.ml \
 				 translationUnit.mli translationUnit.ml \

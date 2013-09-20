@@ -13,7 +13,7 @@ fi
 if test "$OCAMLOPT" = "no"; then
    BUILDTARGETS="byte"
 else
-   BUILDTARGETS="byte opt"
+   BUILDTARGETS="opt byte"
 fi
 
 AC_SUBST([BUILDTARGETS])
