@@ -315,7 +315,7 @@ CAMLprim value ml_libclang_cxtype_alignment_of(value type)
 {
    CAMLparam1(type);
 
-   long long v = clang_getAlignOf(CXType_val(type));
+   long long v = clang_Type_getAlignOf(CXType_val(type));
 
    if (v < 0LL) {
       CAMLreturn(caml_copy_int64(ml_libclang_map_type_layout_error(v)));
@@ -328,7 +328,7 @@ CAMLprim value ml_libclang_cxtype_size_of(value type)
 {
    CAMLparam1(type);
 
-   long long v = clang_getSizeOf(CXType_val(type));
+   long long v = clang_Type_getSizeOf(CXType_val(type));
 
    if (v < 0LL) {
       CAMLreturn(caml_copy_int64(ml_libclang_map_type_layout_error(v)));
@@ -341,7 +341,7 @@ CAMLprim value ml_libclang_cxtype_offset_of(value type, value field)
 {
    CAMLparam2(type, field);
 
-   long long v = clang_getOffsetOf(CXType_val(type), String_val(field));
+   long long v = clang_Type_getOffsetOf(CXType_val(type), String_val(field));
 
    if (v < 0LL) {
       CAMLreturn(caml_copy_int64(ml_libclang_map_type_layout_error(v)));
