@@ -88,13 +88,12 @@ CAMLprim value ml_libclang_save_cxtranslationunit(value tu, value fname)
 
 unsigned int process_tu_options(value opts)
 {
-   CAMLparam1(opts);
-   CAMLlocal1(xs);
+   value xs = opts;
 
    unsigned int options = CXTranslationUnit_None;
 
    while (xs != Val_emptylist) {
-      switch (Field(xs, 0))
+      switch (Int_val(Field(xs, 0)))
       {
          case 0:
             options |= CXTranslationUnit_None;
@@ -156,7 +155,7 @@ CAMLprim value ml_libclang_parse_cxtranslationunit(value idx, value fname, value
       xs = Field(xs, 1);
    }
 
-   v = ml_libclang_alloc_cxtranslationunit(clang_parseTranslationUnit(CXIndex_val(idx), String_val(fname), (const char *const *)c_args, Int_val(n_args), NULL, 0, process_tu_options(opts)));
+   v = ml_libclang_alloc_cxtranslationunit(clang_parseTranslationUnit(CXIndex_val(idx), String_val(fname), (const char *const *)c_args, n_args, NULL, 0, process_tu_options(opts)));
 
    free(c_args);
 
