@@ -259,7 +259,7 @@ CAMLprim value ml_libclang_cxcursor_arguments(value cursor)
 		}
 		CAMLreturn(xs);
 	} else {
-		caml_raise(*caml_named_value("ml_libclang_exn_cursor_no_args"));
+		caml_raise_constant(*caml_named_value("ml_libclang_exn_cursor_no_args"));
 	}
 }
 

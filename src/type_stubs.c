@@ -80,7 +80,7 @@ CAMLprim value ml_libclang_cxtype_int_type_of_const_enum(value cursor)
    if (ml_libclang_is_valid_const_enum_decl(CXCursor_val(cursor))) {
       CAMLreturn(caml_copy_int64(clang_getEnumConstantDeclValue(CXCursor_val(cursor))));
    } else {
-      caml_raise(*caml_named_value("ml_libclang_exn_type_invalid_enum_decl"));
+      caml_raise_constant(*caml_named_value("ml_libclang_exn_type_invalid_enum_decl"));
    }
 }
 
@@ -92,7 +92,7 @@ CAMLprim value ml_libclang_cxtype_uint_type_of_const_enum(value cursor)
       /* Recast this back to unsigned on OCaml side using uint64 */
       CAMLreturn(caml_copy_int64((long long)clang_getEnumConstantDeclUnsignedValue(CXCursor_val(cursor))));
    } else {
-      caml_raise(*caml_named_value("ml_libclang_exn_type_invalid_enum_decl"));
+      caml_raise_constant(*caml_named_value("ml_libclang_exn_type_invalid_enum_decl"));
    }
 }
 
@@ -220,7 +220,7 @@ CAMLprim value ml_libclang_cxtype_arguments(value type)
       }
       CAMLreturn(xs);
    } else {
-      caml_raise(*caml_named_value("ml_libclang_exn_type_not_function")); /* FIXME */
+      caml_raise_constant(*caml_named_value("ml_libclang_exn_type_not_function")); /* FIXME */
    }
 }
 

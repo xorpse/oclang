@@ -33,7 +33,7 @@ value ml_libclang_alloc_cxtranslationunit(CXTranslationUnit tu)
       CXTranslationUnit_val(v) = tu;
       return(v);
    } else {
-      caml_raise(*caml_named_value("ml_libclang_exn_tu_alloc"));
+      caml_raise_constant(*caml_named_value("ml_libclang_exn_tu_alloc"));
    }
 }
 
@@ -168,7 +168,7 @@ CAMLprim value ml_libclang_reparse_cxtranslationunit(value tu, value opts)
    CAMLparam2(tu, opts);
    
    if (clang_reparseTranslationUnit(CXTranslationUnit_val(tu), 0, NULL, process_tu_options(opts))) {
-      caml_raise(*caml_named_value("ml_libclang_exn_tu_reparse"));
+      caml_raise_constant(*caml_named_value("ml_libclang_exn_tu_reparse"));
    } else {
       CAMLreturn(Val_unit);
    }
