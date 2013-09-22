@@ -202,8 +202,10 @@ type location = {
 type kind = kind_tag
 
 exception NoArguments (* ml_libclang_exn_no_args *)
+exception NoSuchFile of string
 
 let () = Callback.register_exception "ml_libclang_exn_cursor_no_args" NoArguments
+let () = Callback.register_exception "ml_libclang_exn_cursor_no_such_file" (NoSuchFile "")
 
 let rec int_of_kind = function
    | UnexposedDecl                      -> 1
@@ -586,3 +588,9 @@ external cxx_method_is_static : t -> bool = "ml_libclang_cxcursor_cxx_meth_is_st
 external cxx_method_is_virtual : t -> bool = "ml_libclang_cxcursor_cxx_meth_is_virtual"
 external kind_of_template' : t -> int = "ml_libclang_cxcursor_cxx_kind_of_template"
 let kind_of_template t = kind_of_int (kind_of_template' t)
+
+external includes_of' : TranslationUnit.t -> string -> t list = "ml_libclang_cxcursor_find_includes_of"
+let includes_of t f = List.rev (includes_of' t f)
+
+external references_to' : t -> string -> t list = "ml_libclang_cxcursor_find_references_to"
+let references_to t f = List.rev (references_to' t f)

@@ -12,9 +12,11 @@
 #include "index.h"
 #include "translation_unit.h"
 
-void ml_libclang_finalize_cxtranslationunit(value tu)
+CAMLprim void ml_libclang_finalize_cxtranslationunit(value tu)
 {
+   CAMLparam0();
    clang_disposeTranslationUnit(CXTranslationUnit_val(tu));
+   CAMLreturn0;
 }
 
 static struct custom_operations libclang_cxtranslationunit_ops = {
@@ -28,10 +30,11 @@ static struct custom_operations libclang_cxtranslationunit_ops = {
 
 value ml_libclang_alloc_cxtranslationunit(CXTranslationUnit tu)
 {
+   CAMLparam0();
    if (tu) {
       value v = alloc_custom(&libclang_cxtranslationunit_ops, sizeof(CXTranslationUnit), 0, 1);
       CXTranslationUnit_val(v) = tu;
-      return(v);
+      CAMLreturn(v);
    } else {
       caml_raise_constant(*caml_named_value("ml_libclang_exn_tu_alloc"));
    }
@@ -88,7 +91,9 @@ CAMLprim value ml_libclang_save_cxtranslationunit(value tu, value fname)
 
 unsigned int process_tu_options(value opts)
 {
-   value xs = opts;
+   CAMLparam0();
+   CAMLlocal1(xs);
+   xs = opts;
 
    unsigned int options = CXTranslationUnit_None;
 
@@ -128,7 +133,7 @@ unsigned int process_tu_options(value opts)
       xs = Field(xs, 1);
    }
 
-   return(options);
+   CAMLreturnT(unsigned int, options);
 }
 
 CAMLprim value ml_libclang_parse_cxtranslationunit(value idx, value fname, value args, value opts)
@@ -170,5 +175,72 @@ CAMLprim value ml_libclang_reparse_cxtranslationunit(value tu, value opts)
       caml_raise_constant(*caml_named_value("ml_libclang_exn_tu_reparse"));
    } else {
       CAMLreturn(Val_unit);
+   }
+}
+
+void ml_libclang_cxtranslationunit_inclusion_visitor(CXFile file, CXSourceLocation *inclusion_stack, unsigned inclusion_len, CXClientData client_data)
+{
+   CAMLparam0();
+   CAMLlocal4(xs, ys, zs, loc);
+
+   CXFile inc_file;
+   CXString name;
+   unsigned line, column, offset;
+
+   ys = Val_emptylist;
+   while (inclusion_len--)
+   {
+      clang_getFileLocation(*inclusion_stack++, &inc_file, &line, &column, &offset);
+      loc = caml_alloc_tuple(4);
+      
+      name = clang_getFileName(inc_file);
+      Store_field(loc, 0, caml_copy_string(clang_getCString(name)));
+      clang_disposeString(name);
+
+      Store_field(loc, 1, Val_int(line));
+      Store_field(loc, 2, Val_int(column));
+      Store_field(loc, 3, Val_int(offset));
+      
+      zs = caml_alloc(2, 0);
+      Store_field(zs, 0, loc);
+      Store_field(zs, 1, ys);
+      ys = zs;
+   }
+
+   zs = caml_alloc_tuple(2);
+   name = clang_getFileName(file);
+   Store_field(zs, 0, caml_copy_string(clang_getCString(name)));
+   clang_disposeString(name);
+   Store_field(zs, 1, ys);
+
+   xs = caml_alloc(2, 0);
+   Store_field(xs, 0, zs);
+   Store_field(xs, 1, *((value *)client_data));
+   *((value *)client_data) = xs;
+
+   CAMLreturn0;
+}
+
+CAMLprim value ml_libclang_cxtranslationunit_inclusions(value tu)
+{
+   CAMLparam1(tu);
+   CAMLlocal1(inclusions);
+
+   inclusions = Val_emptylist;
+   clang_getInclusions(CXTranslationUnit_val(tu), ml_libclang_cxtranslationunit_inclusion_visitor, &inclusions);
+
+   CAMLreturn(inclusions);
+}
+
+CAMLprim value ml_libclang_cxtranslationunit_is_header_guarded(value tu, value header)
+{
+   CAMLparam2(tu, header);
+
+   CXFile file = clang_getFile(CXTranslationUnit_val(tu), String_val(header));
+
+   if (file) {
+      CAMLreturn(Val_bool(clang_isFileMultipleIncludeGuarded(CXTranslationUnit_val(tu), file)));
+   } else {
+      caml_raise_with_arg(*caml_named_value("ml_libclang_exn_tu_no_such_file"), header);
    }
 }

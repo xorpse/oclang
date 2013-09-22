@@ -9,9 +9,11 @@
 #include <clang-c/Index.h>
 #include "index.h"
 
-void ml_libclang_finalize_cxindex(value idx)
+CAMLprim void ml_libclang_finalize_cxindex(value idx)
 {
+   CAMLparam1(idx);
    clang_disposeIndex(CXIndex_val(idx));
+   CAMLreturn0;
 }
 
 static struct custom_operations libclang_cxindex_ops = {
@@ -25,9 +27,11 @@ static struct custom_operations libclang_cxindex_ops = {
 
 value ml_libclang_alloc_cxindex(CXIndex idx)
 {
-   value v = alloc_custom(&libclang_cxindex_ops, sizeof(CXIndex), 0, 1);
+   CAMLparam0();
+   CAMLlocal1(v);
+   v = alloc_custom(&libclang_cxindex_ops, sizeof(CXIndex), 0, 1);
    CXIndex_val(v) = idx;
-   return(v);
+   CAMLreturn(v);
 }
 
 CAMLprim value ml_libclang_create_cxindex(value exclude_decls_from_PCH, value display_diagnostics)

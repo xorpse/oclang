@@ -80,6 +80,7 @@ exception LayoutError of layout_error
 
 val of_cursor : Cursor.t -> t
 val name : t -> string
+val kind : t -> kind
 
 val resolve_typedef : t -> t
 

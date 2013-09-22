@@ -14,9 +14,10 @@
 #include "cursor.h"
 #include "type.h"
 
-int ml_libclang_compare_cxtype(value t1, value t2)
+CAMLprim int ml_libclang_compare_cxtype(value t1, value t2)
 {
-	return(!clang_equalTypes(CXType_val(t1), CXType_val(t2)));
+   CAMLparam2(t1, t2);
+	CAMLreturnT(int, !clang_equalTypes(CXType_val(t1), CXType_val(t2)));
 }
 
 static struct custom_operations libclang_cxtype_ops = {
@@ -28,12 +29,13 @@ static struct custom_operations libclang_cxtype_ops = {
    custom_deserialize_default
 };
 
-
 value ml_libclang_alloc_cxtype(CXType type)
 {
-	value v = alloc_custom(&libclang_cxtype_ops, sizeof(CXType), 0, 1);
+   CAMLparam0();
+   CAMLlocal1(v);
+	v = alloc_custom(&libclang_cxtype_ops, sizeof(CXType), 0, 1);
 	memcpy(Data_custom_val(v), &type, sizeof(CXType));
-	return(v);
+	CAMLreturn(v);
 }
 
 CAMLprim value ml_libclang_cxtype_of_cursor(value cursor)
@@ -56,6 +58,12 @@ CAMLprim value ml_libclang_cxtype_name(value type)
 }
 #endif
 
+CAMLprim value ml_libclang_cxtype_kind(value type)
+{
+   CAMLparam1(type);
+   CAMLreturn(Val_int(CXType_val(type).kind));
+}
+
 CAMLprim value ml_libclang_cxtype_resolve_typedef(value cursor)
 {
    CAMLparam1(cursor);
@@ -70,7 +78,8 @@ CAMLprim value ml_libclang_cxtype_int_type_of_enum(value cursor)
 
 int ml_libclang_is_valid_const_enum_decl(CXCursor cursor)
 {
-   return(clang_getEnumDeclIntegerType(cursor).kind != CXType_Invalid);
+   CAMLparam0();
+   CAMLreturnT(int, clang_getEnumDeclIntegerType(cursor).kind != CXType_Invalid);
 }
 
 CAMLprim value ml_libclang_cxtype_int_type_of_const_enum(value cursor)

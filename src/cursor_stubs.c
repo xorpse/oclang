@@ -13,14 +13,16 @@
 #include "translation_unit.h"
 #include "cursor.h"
 
-int ml_libclang_compare_cxcursor(value c1, value c2)
+CAMLprim int ml_libclang_compare_cxcursor(value c1, value c2)
 {
-	return(!clang_equalCursors(CXCursor_val(c1), CXCursor_val(c2)));
+   CAMLparam2(c1, c2);
+	CAMLreturnT(int, !clang_equalCursors(CXCursor_val(c1), CXCursor_val(c2)));
 }
 
-long ml_libclang_hash_cxcursor(value cursor)
+CAMLprim long ml_libclang_hash_cxcursor(value cursor)
 {
-	return(clang_hashCursor(CXCursor_val(cursor)));
+   CAMLparam1(cursor);
+	CAMLreturnT(long, clang_hashCursor(CXCursor_val(cursor)));
 }
 
 static struct custom_operations libclang_cxcursor_ops = {
@@ -35,9 +37,11 @@ static struct custom_operations libclang_cxcursor_ops = {
 
 value ml_libclang_alloc_cxcursor(CXCursor cursor)
 {
-	value v = alloc_custom(&libclang_cxcursor_ops, sizeof(CXCursor), 0, 1);
+   CAMLparam0();
+   CAMLlocal1(v);
+	v = alloc_custom(&libclang_cxcursor_ops, sizeof(CXCursor), 0, 1);
 	memcpy(Data_custom_val(v), &cursor, sizeof(CXCursor));
-	return(v);
+	CAMLreturn(v);
 }
 
 CAMLprim value ml_libclang_cxcursor_null(value unit)
@@ -175,7 +179,7 @@ enum CXChildVisitResult ml_libclang_cxcursor_visitor(CXCursor cursor, CXCursor p
 
 	*((value *)client_data) = xs;
 
-	return(CXChildVisit_Continue);
+	CAMLreturnT(enum CXChildVisitResult, CXChildVisit_Continue);
 }
 
 CAMLprim value ml_libclang_cxcursor_children(value cursor)
@@ -361,3 +365,60 @@ CAMLprim value ml_libclang_cxcursor_cxx_specialized_cursor_template(value cursor
    CAMLparam1(cursor);
    CAMLreturn(ml_libclang_alloc_cxcursor(clang_getSpecializedCursorTemplate(CXCursor_val(cursor))));
 }
+
+enum CXVisitorResult find_visitor(void *ctx, CXCursor cursor, CXSourceRange range) /* range can be obtained with Cursor.location */
+{
+   CAMLparam0();
+   CAMLlocal1(xs);
+
+   xs = caml_alloc(2, 0);
+   Store_field(xs, 0, ml_libclang_alloc_cxcursor(cursor));
+   Store_field(xs, 1, *((value *)ctx));
+
+   *((value *)ctx) = xs;
+   CAMLreturnT(enum CXVisitorResult, CXVisit_Continue);
+}
+
+#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 13)
+CAMLprim value ml_libclang_cxcursor_find_includes_of(value tu, value file)
+{
+   CAMLparam2(tu, file);
+   CAMLlocal1(includes);
+
+   CXFile f = clang_getFile(CXTranslationUnit_val(tu), String_val(file));
+
+   if (f) {
+      includes = Val_emptylist;
+      CXCursorAndRangeVisitor visitor = {
+         .context = &includes,
+         .visit = find_visitor
+      };
+      clang_findIncludesInFile(CXTranslationUnit_val(tu), f, visitor);
+      CAMLreturn(includes);
+   } else {
+      caml_raise_with_arg(*caml_named_value("ml_libclang_exn_cursor_no_such_file"), file);
+   }
+}
+#endif
+
+CAMLprim value ml_libclang_cxcursor_find_references_to(value cursor, value file)
+{
+   CAMLparam2(cursor, file);
+   CAMLlocal1(references);
+
+   CXTranslationUnit tu = clang_Cursor_getTranslationUnit(CXCursor_val(cursor));
+   CXFile f = clang_getFile(CXTranslationUnit_val(tu), String_val(file));
+
+   if (f) {
+      references = Val_emptylist;
+      CXCursorAndRangeVisitor visitor = {
+         .context = &references,
+         .visit = find_visitor
+      };
+      clang_findReferencesInFile(CXCursor_val(cursor), f, visitor);
+      CAMLreturn(references);
+   } else {
+      caml_raise_with_arg(*caml_named_value("ml_libclang_exn_cursor_no_such_file"), file);
+   }
+}
+

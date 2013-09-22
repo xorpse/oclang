@@ -216,6 +216,8 @@ let calling_conv_of_int = function
 
 external of_cursor : Cursor.t -> t = "ml_libclang_cxtype_of_cursor"
 external name : t -> string = "ml_libclang_cxtype_name"
+external kind' : t -> int = "ml_libclang_cxtype_kind"
+let kind t = kind_of_int (kind' t)
 
 external resolve_typedef : t -> t = "ml_libclang_cxtype_resolve_typedef"
 

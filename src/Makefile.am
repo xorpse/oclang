@@ -10,11 +10,13 @@ oclang_SRC = index.mli index.ml \
 				 translationUnit.mli translationUnit.ml \
 				 cursor.mli cursor.ml \
 				 type.mli type.ml \
+				 util.mli util.ml \
 				 oClang.ml \
 				 index_stubs.c \
 				 translation_unit_stubs.c \
 				 cursor_stubs.c \
-				 type_stubs.c
+				 type_stubs.c \
+				 util_stubs.c
 
 C_OBJS = $(patsubst %.c, %.o, $(filter %.c,$(oclang_SRC)))
 ML_BYTE_OBJS = $(patsubst %.ml, %.cmo, $(filter %.ml,$(oclang_SRC)))

@@ -247,7 +247,6 @@ val cxx_method_is_static : t -> bool
 val cxx_method_is_virtual : t -> bool
 
 val kind_of_template : t -> kind
-(* Maybe:
-   * clang_findIncludesInFile
-   * clang_findReferencesInFile
- *)
+
+val includes_of   : TranslationUnit.t -> string -> t list
+val references_to : t -> string -> t list
