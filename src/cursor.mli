@@ -1,6 +1,11 @@
 
+(** Functions for operations on Cursor types
+@see <http://clang.llvm.org/doxygen/group__CINDEX__CURSOR__TRAVERSAL.html> Official C API Documentation *)
+
+(** Abstract Cursor type *)
 type t
 
+(** Kind pointed to by cursor {b will become [kind]} *)
 type kind_tag =
    | UnexposedDecl
    | StructDecl
@@ -189,30 +194,38 @@ type access =
    | PrivateAccess
 
 type location = {
-   file  : string;
-   s_row : int;
-   s_col : int;
-   s_off : int;
-   e_row : int;
-   e_col : int;
-   e_off : int
+   file  : string; (** File name *)
+   s_row : int; (** Range start row (line) *)
+   s_col : int; (** Range start column *)
+   s_off : int; (** Range start offset *)
+   e_row : int; (** Range end row (line) *)
+   e_col : int; (** Range end column *)
+   e_off : int  (** Range end offset *)
 }
 
-(*type kind = int * kind_tag *)
 type kind = kind_tag
 
-exception NoArguments (* ml_libclang_exn_no_args *)
+exception NoArguments
 
 val null : unit -> t
+(** Create a null cursor *)
+
 val is_null : t -> bool
+(** [is_null cursor] checks if given cursor is null *)
 
 val of_translation_unit : TranslationUnit.t -> t
-val to_translation_unit : t -> TranslationUnit.t
+(** [of_translation_unit translation_unit] creates a cursor from the given [translation_unit] *)
 
-(* Implement equality *)
+val to_translation_unit : t -> TranslationUnit.t
+(** [to_translation_unit cursor] returns translation unit corresponding to the given [cursor] *)
 
 val kind : t -> kind
+(** [kind cursor] returns the kind ({!Cursor.kind_tag}) of value the cursor points to *)
+
 val kind_eq : kind -> kind -> bool
+(** [kind_eq k1 k2] tests if [k1] is equal to [k2] *)
+
+(** {2 Predicates on kind of cursor } *)
 
 val is_declaration : kind -> bool
 val is_reference : kind -> bool
@@ -223,6 +236,8 @@ val is_invalid : kind -> bool
 val is_translation_unit : kind -> bool
 val is_preprocessing : kind -> bool
 val is_unexposed : kind -> bool
+
+(** {2 Operations on cursors } *)
 
 val access : t -> access
 val linkage : t -> linkage

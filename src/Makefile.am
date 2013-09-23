@@ -21,6 +21,7 @@ oclang_SRC = index.mli index.ml \
 C_OBJS = $(patsubst %.c, %.o, $(filter %.c,$(oclang_SRC)))
 ML_BYTE_OBJS = $(patsubst %.ml, %.cmo, $(filter %.ml,$(oclang_SRC)))
 ML_OPT_OBJS = $(patsubst %.ml, %.cmx, $(filter %.ml,$(oclang_SRC)))
+MLIS = $(filter %.mli,$(oclang_SRC))
 
 EXPORTED_OBJS = oClang
 INSTALL_OBJS = $(addsuffix .cmi, $(EXPORTED_OBJS))
@@ -53,6 +54,10 @@ install: all
 
 install-findlib: all
 	$(OCAMLFIND) install oclang META *.mli *.ml $(INSTALL_OBJS) *.cma *.a $(wildcard *.cmxs) $(wildcard *.cmxa) $(wildcard *.so)
+
+documentation:
+	mkdir -p ../documentation
+	$(OCAMLFIND) ocamldoc -sort -html -d ../documentation/ $(MLIS) -package @OCAML_PKG_uint@
 
 clean:
 	-rm -f *.cm* *.o *.a *.so META
