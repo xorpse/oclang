@@ -1,5 +1,5 @@
 # OClang
-OCaml bindings to libclang. Incomplete and (mostly) untested.
+OCaml bindings to libclang.
 
 ### Building and installation
 
@@ -14,3 +14,7 @@ For installation with ocamlfind:
 Otherwise:
 
     $ make install
+
+For documentation generation:
+
+    $ make documentation
