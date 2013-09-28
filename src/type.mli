@@ -1,6 +1,11 @@
 
+(** Functions for operations on Type types
+@see <http://clang.llvm.org/doxygen/group__CINDEX__TYPES.html> Official C API Documentation *)
+
+(** Abstract Type type *)
 type t
 
+(** Possible kinds of a Type *)
 type kind =
    | Invalid
    | Unexposed
@@ -52,6 +57,7 @@ type kind =
    | VariableArray
    | DependentSizedArray
 
+(** Possible calling conventions *)
 type calling_conv =
    | CallingConv_Default
    | CallingConv_C
@@ -79,10 +85,15 @@ exception InvalidEnumDecl
 exception LayoutError of layout_error
 
 val of_cursor : Cursor.t -> t
+(** [of_cursor cursor] produces the type of a given [cursor] *)
+
 val name : t -> string
+(** [name cursor] produces a string representation of the name of the given [cursor] *)
+
 val kind : t -> kind
 
 val resolve_typedef : t -> t
+(** [resolve_typedef type] produces the underlying type of the given [type] *)
 
 val int_type_of_enum : t -> t
 val int64_of_enum_const_decl : t -> int64
@@ -109,15 +120,26 @@ val calling_convention : t -> calling_conv
 val result_type : t -> t
 
 val argument_count : t -> int option
+(** [argument_count type] produces the number of arguments of the given [type] or [None] if the type is a non-function type *)
+
 val arguments : t -> t list
+(** [arguments type] produces the types of the arguments of the given [type]
+@raise NotFunction if [type] is a non-function type *)
 
 val is_variadic : t -> bool
 val is_plain_old_data : t -> bool
 
 val of_element : t -> t
+(** [of_element type] produces the type of the elements within the given array/complex/vector type *)
+
 val element_count : t -> int option
+(** [element_count type] produces the number of elements of the given array/vector type, or [None] *)
+
 val of_array_element : t -> t
+(** [of_array_element type] produces the element type of the given array [type] *)
+
 val array_size : t -> int option
+(** [array_size type] produces the number of elements within the given array [type], or [None] *)
 
 val align_of : t -> int64
 val size_of : t -> int64

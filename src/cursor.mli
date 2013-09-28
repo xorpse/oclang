@@ -244,12 +244,26 @@ val linkage : t -> linkage
 val language : t -> language
 
 val children : t -> t list
+(** [children cursor] produces a list of direct children *)
+
 val semantic_parent : t -> t
+(** @see <http://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html> Official Documentation (clang_getCursorSemanticParent) *)
+
 val lexical_parent : t -> t
+(** @see <http://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html> Official Documentation (clang_getCursorLexicalParent) *)
+
 val name : t -> string
+(** [name cursor] produces the 'spelling' of the given [cursor] *)
+
 val display_name : t -> string
+
 val argument_count : t -> int option
+(** [argument_count cursor] produces the number of (non-variadic) arguments to a call/declaration of a function or method, produces [None] for other cursors *)
+
 val arguments : t -> t list
+(** [arguments cursor] produces a list of cursors representing the arguments to a call/declaration of a function or method
+@raise NoArguments when the cursor is not a call/declaration of a function or method *)
+
 val location : t -> location
 val referenced : t -> t
 val definition : t -> t
@@ -263,5 +277,12 @@ val cxx_method_is_virtual : t -> bool
 
 val kind_of_template : t -> kind
 
+(** {2 Miscellaneous functions} *)
+
 val includes_of   : TranslationUnit.t -> string -> t list
+(** [includes_of translation_unit file_name] produces the includes of the given file ([file_name]) withing the given [translation_unit]
+@raise NoSuchFile [file_name] when the named file doesn't exist within the given [translation_unit] *)
+
 val references_to : t -> string -> t list
+(** [references_to cursor file_name] produces the references to the given [cursor] within the file ([file_name]) which resides in the same translation unit as the given [cursor]
+@raise NoSuchFile [file_name] when the named file doesn't exist within the translation unit containing the given [cursor] *)
