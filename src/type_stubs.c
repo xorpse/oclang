@@ -44,7 +44,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 CAMLprim int ml_libclang_compare_cxtype(value t1, value t2)
 {
    CAMLparam2(t1, t2);
-	CAMLreturnT(int, !clang_equalTypes(CXType_val(t1), CXType_val(t2)));
+  CAMLreturnT(int, !clang_equalTypes(CXType_val(t1), CXType_val(t2)));
 }
 
 static struct custom_operations libclang_cxtype_ops = {
@@ -60,9 +60,9 @@ value ml_libclang_alloc_cxtype(CXType type)
 {
    CAMLparam0();
    CAMLlocal1(v);
-	v = alloc_custom(&libclang_cxtype_ops, sizeof(CXType), 0, 1);
-	memcpy(Data_custom_val(v), &type, sizeof(CXType));
-	CAMLreturn(v);
+  v = alloc_custom(&libclang_cxtype_ops, sizeof(CXType), 0, 1);
+  memcpy(Data_custom_val(v), &type, sizeof(CXType));
+  CAMLreturn(v);
 }
 
 CAMLprim value ml_libclang_cxtype_of_cursor(value cursor)
