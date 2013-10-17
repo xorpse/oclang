@@ -345,13 +345,11 @@ CAMLprim value ml_libclang_cxcursor_is_definition(value cursor)
 	CAMLreturn(Val_bool(!!clang_isCursorDefinition(CXCursor_val(cursor))));
 }
 
-#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 16)
 CAMLprim value ml_libclang_cxcursor_is_bit_field(value cursor)
 {
    CAMLparam1(cursor);
    CAMLreturn(Val_bool(!!clang_Cursor_isBitField(CXCursor_val(cursor))));
 }
-#endif
 
 CAMLprim value ml_libclang_cxcursor_is_virtual_base(value cursor)
 {
@@ -405,7 +403,6 @@ enum CXVisitorResult find_visitor(void *ctx, CXCursor cursor, CXSourceRange rang
    CAMLreturnT(enum CXVisitorResult, CXVisit_Continue);
 }
 
-#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 13)
 CAMLprim value ml_libclang_cxcursor_find_includes_of(value tu, value file)
 {
    CAMLparam2(tu, file);
@@ -425,7 +422,6 @@ CAMLprim value ml_libclang_cxcursor_find_includes_of(value tu, value file)
       caml_raise_with_arg(*caml_named_value("ml_libclang_exn_cursor_no_such_file"), file);
    }
 }
-#endif
 
 CAMLprim value ml_libclang_cxcursor_find_references_to(value cursor, value file)
 {

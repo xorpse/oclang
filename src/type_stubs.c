@@ -35,6 +35,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
 #include <caml/callback.h>
 
 #include <clang-c/Index.h>
+#include <clang-c/CXString.h>
 #include "index.h"
 #include "translation_unit.h"
 #include "cursor.h"
@@ -70,7 +71,6 @@ CAMLprim value ml_libclang_cxtype_of_cursor(value cursor)
    CAMLreturn(ml_libclang_alloc_cxtype(clang_getCursorType(CXCursor_val(cursor))));
 }
 
-#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 12)
 CAMLprim value ml_libclang_cxtype_name(value type)
 {
    CAMLparam1(type);
@@ -82,7 +82,6 @@ CAMLprim value ml_libclang_cxtype_name(value type)
 
    CAMLreturn(name);
 }
-#endif
 
 CAMLprim value ml_libclang_cxtype_kind(value type)
 {
@@ -131,7 +130,6 @@ CAMLprim value ml_libclang_cxtype_uint_type_of_const_enum(value cursor)
    }
 }
 
-#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 8)
 CAMLprim value ml_libclang_cxtype_bit_width(value cursor)
 {
    CAMLparam1(cursor);
@@ -147,7 +145,6 @@ CAMLprim value ml_libclang_cxtype_bit_width(value cursor)
 
    CAMLreturn(v);
 }
-#endif
 
 CAMLprim value ml_libclang_cxtype_canonical(value type)
 {
@@ -321,7 +318,6 @@ CAMLprim value ml_libclang_cxtype_array_size(value type)
    CAMLreturn(v);
 }
 
-#if CINDEX_VERSION >= CINDEX_VERSION_ENCODE(0, 16)
 long long ml_libclang_map_type_layout_error(long long v)
 {
    switch (v)
@@ -384,4 +380,3 @@ CAMLprim value ml_libclang_cxtype_offset_of(value type, value field)
       CAMLreturn(caml_copy_int64(v));
    }
 }
-#endif

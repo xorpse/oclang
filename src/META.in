@@ -1,4 +1,5 @@
 version = "@PACKAGE_VERSION@"
+requires = "uint.uint64"
 description = "oclang - bindings to libclang."
 archive(byte) = "oclang.cma"
 archive(byte, plugin) = "oclang.cma"

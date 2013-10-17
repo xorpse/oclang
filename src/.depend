@@ -2,6 +2,7 @@ cursor.cmi : translationUnit.cmi
 index.cmi :
 translationUnit.cmi : index.cmi
 type.cmi :
+util.cmi :
 cursor.cmo : translationUnit.cmi cursor.cmi
 cursor.cmx : translationUnit.cmx cursor.cmi
 index.cmo : index.cmi
@@ -12,3 +13,4 @@ translationUnit.cmo : index.cmi translationUnit.cmi
 translationUnit.cmx : index.cmx translationUnit.cmi
 type.cmo : type.cmi
 type.cmx : type.cmi
+util.cmx : util.cmi
