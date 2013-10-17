@@ -18,3 +18,8 @@ Otherwise:
 For documentation generation:
 
     $ make documentation
+
+### Contributors
+
+* Sam Thomas (sghost)
+* Patroklos Argyroudis (argp)

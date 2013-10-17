@@ -236,8 +236,11 @@ CAMLprim value ml_libclang_cxcursor_name(value cursor)
 	CAMLparam1(cursor);
 	CAMLlocal1(name);
 
+  const char *cstr = NULL;
 	CXString str = clang_getCursorSpelling(CXCursor_val(cursor));
-	name = caml_copy_string(clang_getCString(str));
+
+  cstr = clang_getCString(str);
+	name = caml_copy_string(!cstr ? "" : cstr);
 	clang_disposeString(str);
 
 	CAMLreturn(name);
@@ -248,8 +251,11 @@ CAMLprim value ml_libclang_cxcursor_display_name(value cursor)
 	CAMLparam1(cursor);
 	CAMLlocal1(display_name);
 
+  const char *cstr = NULL;
 	CXString str = clang_getCursorDisplayName(CXCursor_val(cursor));
-	display_name = caml_copy_string(clang_getCString(str));
+
+  cstr = clang_getCString(str);
+	display_name = caml_copy_string(!cstr ? "" : cstr);
 	clang_disposeString(str);
 
 	CAMLreturn(display_name);
@@ -300,6 +306,7 @@ CAMLprim value ml_libclang_cxcursor_location(value cursor)
 
 	CXFile file;
 	CXString fname;
+  const char *cstr = NULL;
 	unsigned int row, col, off;
 
 	v = caml_alloc_tuple(7);
@@ -310,7 +317,8 @@ CAMLprim value ml_libclang_cxcursor_location(value cursor)
 	clang_getSpellingLocation(loc, &file, &row, &col, &off);
 
 	fname = clang_getFileName(file);
-	Store_field(v, 0, caml_copy_string(clang_getCString(fname)));
+  cstr = clang_getCString(fname);
+	Store_field(v, 0, caml_copy_string(!cstr ? "" : cstr));
 	clang_disposeString(fname);
 
 	Store_field(v, 1, Val_int(row));
